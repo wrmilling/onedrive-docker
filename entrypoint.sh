@@ -65,7 +65,7 @@ if [ "${ONEDRIVE_LOGOUT:=0}" == "1" ]; then
 fi
 
 # Tell client to use auth-files to authenticate the client
-if [ -z "${ONEDRIVE_AUTHFILES}" ]; then
+if [ -n "${ONEDRIVE_AUTHFILES}" ]; then
    echo "# We are using auth files to perform authentication"
    ARGS=(--auth-files ${ONEDRIVE_AUTHFILES} ${ARGS[@]})
 fi
