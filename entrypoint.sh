@@ -74,5 +74,11 @@ if [ ${#} -gt 0 ]; then
   ARGS=("${@}")
 fi
 
+# Tell client to logout based on environment variable
+if [ "${KAH_HELM_INSTALL:=0}" == "1" ]; then
+   echo "# Performing helm release install step"
+   ln -s /onedrive/auth-response /onedrive/conf/auth-response
+fi
+
 exec gosu "${oduser}" /usr/local/bin/onedrive "${ARGS[@]}"
 
