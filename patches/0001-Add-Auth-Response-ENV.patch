@@ -1,33 +1,87 @@
-From 60924a006c8d3ec3d889b49e6b5eae5f1bb545bd Mon Sep 17 00:00:00 2001
+From 3f34fa68f9ebddc19ce2254007dc835e24418050 Mon Sep 17 00:00:00 2001
 From: "Winston R. Milling" <Winston@Milli.ng>
 Date: Mon, 13 Sep 2021 15:24:27 -0500
 Subject: [PATCH] Add Auth Response ENV
 
 ---
- contrib/docker/entrypoint.sh | 11 +++++++++++
+ contrib/docker/entrypoint.sh | 22 +++++++++++++++++++++-
  docs/Docker.md               |  2 ++
  docs/USAGE.md                |  2 ++
  src/config.d                 |  4 ++++
  src/onedrive.d               | 15 +++++++++------
- 5 files changed, 28 insertions(+), 6 deletions(-)
+ 5 files changed, 38 insertions(+), 7 deletions(-)
 
 diff --git a/contrib/docker/entrypoint.sh b/contrib/docker/entrypoint.sh
-index b76604a..548e4bd 100755
+index b76604a..db1e8b2 100755
 --- a/contrib/docker/entrypoint.sh
 +++ b/contrib/docker/entrypoint.sh
-@@ -64,6 +64,17 @@ if [ "${ONEDRIVE_LOGOUT:=0}" == "1" ]; then
+@@ -1,6 +1,6 @@
+ #!/bin/bash -eu
+ 
+-set +H -xeuo pipefail
++set +H -euo pipefail
+ 
+ : ${ONEDRIVE_UID:=$(stat /onedrive/data -c '%u')}
+ : ${ONEDRIVE_GID:=$(stat /onedrive/data -c '%g')}
+@@ -27,43 +27,63 @@ chown "${oduser}:${odgroup}" /onedrive/ /onedrive/conf
+ 
+ # Default parameters
+ ARGS=(--monitor --confdir /onedrive/conf --syncdir /onedrive/data)
++echo Base Args: ${ARGS}
+ 
+ # Make Verbose output optional, based on an environment variable
+ if [ "${ONEDRIVE_VERBOSE:=0}" == "1" ]; then
+    echo "# We are being verbose"
++   echo "# Adding --verbose"
+    ARGS=(--verbose ${ARGS[@]})
+ fi
+ 
+ # Tell client to perform debug output, based on an environment variable
+ if [ "${ONEDRIVE_DEBUG:=0}" == "1" ]; then
+    echo "# We are performing debug output"
++   echo "# Adding --verbose --verbose"
+    ARGS=(--verbose --verbose ${ARGS[@]})
+ fi
+ 
+ # Tell client to perform HTTPS debug output, based on an environment variable
+ if [ "${ONEDRIVE_DEBUG_HTTPS:=0}" == "1" ]; then
+    echo "# We are performing HTTPS debug output"
++   echo "# Adding --debug-https"
+    ARGS=(--debug-https ${ARGS[@]})
+ fi
+ 
+ # Tell client to perform a resync based on environment variable
+ if [ "${ONEDRIVE_RESYNC:=0}" == "1" ]; then
+    echo "# We are performing a --resync"
++   echo "# Adding --resync"
+    ARGS=(--resync ${ARGS[@]})
+ fi
+ 
+ # Tell client to sync in download-only mode based on environment variable
+ if [ "${ONEDRIVE_DOWNLOADONLY:=0}" == "1" ]; then
+    echo "# We are synchronizing in download-only mode"
++   echo "# Adding --download-only"
+    ARGS=(--download-only ${ARGS[@]})
+ fi
+ 
+ # Tell client to logout based on environment variable
+ if [ "${ONEDRIVE_LOGOUT:=0}" == "1" ]; then
+    echo "# We are logging out to perform a reauthentication"
++   echo "# Adding --logout"
     ARGS=(--logout ${ARGS[@]})
  fi
  
 +# Tell client to utilize auth files at the provided locations based on environment variable
 +if [ -n "${ONEDRIVE_AUTHFILES}" ]; then
 +   echo "# We are using auth files to perform authentication"
++   echo "# Adding --auth-files ARG"
 +   ARGS=(--auth-files ${ONEDRIVE_AUTHFILES} ${ARGS[@]})
 +fi
 +
 +# Tell client to utilize provided auth reponse based on environment variable
 +if [ -n "${ONEDRIVE_AUTHRESPONSE}" ]; then
 +   echo "# We are using auth files to perform authentication"
++   echo "# Adding --auth-response ARG"
 +   ARGS=(--auth-response \"${ONEDRIVE_AUTHRESPONSE}\" ${ARGS[@]})
 +fi
  
