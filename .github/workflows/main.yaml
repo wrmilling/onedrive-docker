@@ -7,10 +7,6 @@ on:
     - "v*.*.*"
     branches:
     - main
-  pull_request:
-    types:
-    - opened
-    - reopened
   schedule:
   - cron: "0 0 * * 6"
 
@@ -85,8 +81,8 @@ jobs:
         tags: ${{ steps.prep.outputs.tags }}
         build-args: |
           IMAGE_SOURCE=$GITHUB_SERVER_URL/${{ github.repository }}
-        cache-from: ${{ steps.prep.outputs.cache_from }}
-        cache-to: ${{ steps.prep.outputs.cache_to }}
+        # cache-from: ${{ steps.prep.outputs.cache_from }}
+        # cache-to: ${{ steps.prep.outputs.cache_to }}
 
     - name: Image digest
       run: echo ${{ steps.docker_build.outputs.digest }}
