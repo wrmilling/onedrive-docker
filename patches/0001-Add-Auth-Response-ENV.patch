@@ -1,0 +1,119 @@
+From fd364cfca105338e49de0cc71caa01b92d487e7f Mon Sep 17 00:00:00 2001
+From: "Winston R. Milling" <Winston@Milli.ng>
+Date: Mon, 13 Sep 2021 15:24:27 -0500
+Subject: [PATCH] Add Auth Response ENV
+
+---
+ contrib/docker/entrypoint.sh | 11 +++++++++++
+ docs/Docker.md               |  2 ++
+ docs/USAGE.md                |  2 ++
+ src/config.d                 |  4 ++++
+ src/onedrive.d               | 15 +++++++++------
+ 5 files changed, 28 insertions(+), 6 deletions(-)
+
+diff --git a/contrib/docker/entrypoint.sh b/contrib/docker/entrypoint.sh
+index b76604a..548e4bd 100755
+--- a/contrib/docker/entrypoint.sh
++++ b/contrib/docker/entrypoint.sh
+@@ -64,6 +64,17 @@ if [ "${ONEDRIVE_LOGOUT:=0}" == "1" ]; then
+    ARGS=(--logout ${ARGS[@]})
+ fi
+ 
++# Tell client to utilize auth files at the provided locations based on environment variable
++if [ -n "${ONEDRIVE_AUTHFILES}" ]; then
++   echo "# We are using auth files to perform authentication"
++   ARGS=(--auth-files ${ONEDRIVE_AUTHFILES} ${ARGS[@]})
++fi
++
++# Tell client to utilize provided auth reponse based on environment variable
++if [ -n "${ONEDRIVE_AUTHRESPONSE}" ]; then
++   echo "# We are using auth files to perform authentication"
++   ARGS=(--auth-response \"${ONEDRIVE_AUTHRESPONSE}\" ${ARGS[@]})
++fi
+ 
+ if [ ${#} -gt 0 ]; then
+   ARGS=("${@}")
+diff --git a/docs/Docker.md b/docs/Docker.md
+index c3f0076..ec50295 100644
+--- a/docs/Docker.md
++++ b/docs/Docker.md
+@@ -184,6 +184,8 @@ docker run $firstRun --restart unless-stopped --name onedrive -v onedrive_conf:/
+ | <B>ONEDRIVE_RESYNC</B> | Controls "--resync" switch on onedrive sync. Default is 0 | 1 |
+ | <B>ONEDRIVE_DOWNLOADONLY</B> | Controls "--download-only" switch on onedrive sync. Default is 0 | 1 |
+ | <B>ONEDRIVE_LOGOUT</B> | Controls "--logout" switch. Default is 0 | 1 |
++| <B>ONEDRIVE_AUTHFILES</B> | Controls "--auth-files" option. Default is "" | "authUrl:responseUrl" |
++| <B>ONEDRIVE_AUTHRESPONSE</B> | Controls "--auth-response" option. Default is "" | See [here](https://github.com/abraunegg/onedrive/blob/master/docs/USAGE.md#authorize-the-application-with-your-onedrive-account) |
+ 
+ ### Usage Examples
+ **Verbose Output:**
+diff --git a/docs/USAGE.md b/docs/USAGE.md
+index 2a06d52..843e7d1 100644
+--- a/docs/USAGE.md
++++ b/docs/USAGE.md
+@@ -847,6 +847,8 @@ Options:
+       Perform authorization via two files passed in as ARG in the format `authUrl:responseUrl`
+       The authorization URL is written to the `authUrl`, then onedrive waits for the file `responseUrl`
+       to be present, and reads the response from that file.
++  --auth-response ARG
++      Perform authentication not via interactive dialog but via providing the reponse url directly.
+   --check-for-nomount
+       Check for the presence of .nosync in the syncdir root. If found, do not perform sync.
+   --check-for-nosync
+diff --git a/src/config.d b/src/config.d
+index 4b13c4e..dd89881 100644
+--- a/src/config.d
++++ b/src/config.d
+@@ -277,6 +277,7 @@ final class Config
+ 		stringValues["single_directory"]  = "";
+ 		stringValues["source_directory"]  = "";
+ 		stringValues["auth_files"]        = "";
++		stringValues["auth_response"]     = "";
+ 		boolValues["display_config"]      = false;
+ 		boolValues["display_sync_status"] = false;
+ 		boolValues["print_token"]         = false;
+@@ -300,6 +301,9 @@ final class Config
+ 				"auth-files",
+ 					"Perform authentication not via interactive dialog but via files read/writes to these files.",
+ 					&stringValues["auth_files"],
++				"auth-response",
++					"Perform authentication not via interactive dialog but via providing the reponse url directly.",
++					&stringValues["auth_response"],
+ 				"check-for-nomount",
+ 					"Check for the presence of .nosync in the syncdir root. If found, do not perform sync.", 
+ 					&boolValues["check_nomount"],
+diff --git a/src/onedrive.d b/src/onedrive.d
+index 64ec162..3b9ad0e 100644
+--- a/src/onedrive.d
++++ b/src/onedrive.d
+@@ -435,12 +435,10 @@ final class OneDriveApi
+ 		char[] response;
+ 		string url = authUrl ~ "?client_id=" ~ clientId ~ "&scope=Files.ReadWrite%20Files.ReadWrite.all%20Sites.Read.All%20Sites.ReadWrite.All%20offline_access&response_type=code&redirect_uri=" ~ redirectUrl;
+ 		string authFilesString = cfg.getValueString("auth_files");
+-		if (authFilesString == "") {
+-			log.log("Authorize this app visiting:\n");
+-			write(url, "\n\n", "Enter the response uri: ");
+-			readln(response);
+-			cfg.applicationAuthorizeResponseUri = true;
+-		} else {
++		string authResponseString = cfg.getValueString("auth_response");
++		if (authResponseString != "") {
++			response = authResponseString;
++		} else if (authFilesString != "") {
+ 			string[] authFiles = authFilesString.split(":");
+ 			string authUrl = authFiles[0];
+ 			string responseUrl = authFiles[1];
+@@ -468,6 +466,11 @@ final class OneDriveApi
+ 				log.error("Cannot remove files ", authUrl, " ", responseUrl);
+ 				return false;
+ 			}
++		} else {
++			log.log("Authorize this app visiting:\n");
++			write(url, "\n\n", "Enter the response uri: ");
++			readln(response);
++			cfg.applicationAuthorizeResponseUri = true;
+ 		}
+ 		// match the authorization code
+ 		auto c = matchFirst(response, r"(?:[\?&]code=)([\w\d-.]+)");
+-- 
+2.30.2
+
