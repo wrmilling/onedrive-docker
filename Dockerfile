@@ -10,11 +10,11 @@ RUN apt update && \
 RUN if [ ${TARGETPLATFORM} = 'linux/amd64' ]; then \
       wget http://downloads.dlang.org/releases/2.x/2.097.0/dmd_2.097.0-0_amd64.deb -O /tmp/dmd_amd64.deb && \
        dpkg -i /tmp/dmd_amd64.deb && \
-       rm -f /tmp/dmd_amd64.deb \
+       rm -f /tmp/dmd_amd64.deb; \
     fi \
     if [ ${TARGETPLATFORM} = 'linux/arm64' ]; then \
       wget https://github.com/ldc-developers/ldc/releases/download/v1.16.0/ldc2-1.16.0-linux-aarch64.tar.xz && \
-      tar -xvf ldc2-1.16.0-linux-aarch64.tar.xz \
+      tar -xvf ldc2-1.16.0-linux-aarch64.tar.xz; \
     fi
 
 RUN wget https://github.com/abraunegg/onedrive/archive/refs/tags/v2.4.13.tar.gz -O /tmp/onedrive.tar.gz && \
