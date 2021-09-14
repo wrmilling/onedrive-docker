@@ -1,4 +1,4 @@
-From 3f34fa68f9ebddc19ce2254007dc835e24418050 Mon Sep 17 00:00:00 2001
+From b7480e56b7b3d725c1596ce6364b581beb8282c8 Mon Sep 17 00:00:00 2001
 From: "Winston R. Milling" <Winston@Milli.ng>
 Date: Mon, 13 Sep 2021 15:24:27 -0500
 Subject: [PATCH] Add Auth Response ENV
@@ -12,7 +12,7 @@ Subject: [PATCH] Add Auth Response ENV
  5 files changed, 38 insertions(+), 7 deletions(-)
 
 diff --git a/contrib/docker/entrypoint.sh b/contrib/docker/entrypoint.sh
-index b76604a..db1e8b2 100755
+index b76604a..724d6bc 100755
 --- a/contrib/docker/entrypoint.sh
 +++ b/contrib/docker/entrypoint.sh
 @@ -1,6 +1,6 @@
@@ -72,14 +72,14 @@ index b76604a..db1e8b2 100755
  fi
  
 +# Tell client to utilize auth files at the provided locations based on environment variable
-+if [ -n "${ONEDRIVE_AUTHFILES}" ]; then
++if [ -n "${ONEDRIVE_AUTHFILES:=""}" ]; then
 +   echo "# We are using auth files to perform authentication"
 +   echo "# Adding --auth-files ARG"
 +   ARGS=(--auth-files ${ONEDRIVE_AUTHFILES} ${ARGS[@]})
 +fi
 +
 +# Tell client to utilize provided auth reponse based on environment variable
-+if [ -n "${ONEDRIVE_AUTHRESPONSE}" ]; then
++if [ -n "${ONEDRIVE_AUTHRESPONSE:=""}" ]; then
 +   echo "# We are using auth files to perform authentication"
 +   echo "# Adding --auth-response ARG"
 +   ARGS=(--auth-response \"${ONEDRIVE_AUTHRESPONSE}\" ${ARGS[@]})
