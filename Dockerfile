@@ -21,10 +21,7 @@ RUN wget https://github.com/abraunegg/onedrive/archive/refs/tags/v2.4.14.tar.gz 
 RUN tar -zxvf /tmp/onedrive.tar.gz
 RUN mv onedrive-2.4.14 /usr/src/onedrive
 
-COPY patches/0001-Add-Auth-Response-ENV.patch /usr/src/onedrive/
-
 RUN cd /usr/src/onedrive/ && \
-    patch -Np1 -i ./0001-Add-Auth-Response-ENV.patch && \
     if [ ${TARGETPLATFORM} = 'linux/amd64' ]; then ./configure; fi && \
     if [ ${TARGETPLATFORM} = 'linux/arm64' ]; then ./configure DC=/ldc2-1.16.0-linux-aarch64/bin/ldmd2; fi && \
     make clean && \
