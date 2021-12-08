@@ -13,8 +13,8 @@ RUN if [ ${TARGETPLATFORM} = 'linux/amd64' ]; then \
        rm -f /tmp/dmd_amd64.deb; \
     fi && \
     if [ ${TARGETPLATFORM} = 'linux/arm64' ]; then \
-      wget https://github.com/ldc-developers/ldc/releases/download/v1.16.0/ldc2-1.16.0-linux-aarch64.tar.xz && \
-      tar -xvf ldc2-1.16.0-linux-aarch64.tar.xz; \
+      wget https://github.com/ldc-developers/ldc/releases/download/v1.17.0/ldc2-1.17.0-linux-aarch64.tar.xz && \
+      tar -xvf ldc2-1.17.0-linux-aarch64.tar.xz; \
     fi
 
 RUN wget https://github.com/abraunegg/onedrive/archive/refs/tags/v2.4.14.tar.gz -O /tmp/onedrive.tar.gz
@@ -23,7 +23,7 @@ RUN mv onedrive-2.4.14 /usr/src/onedrive
 
 RUN cd /usr/src/onedrive/ && \
     if [ ${TARGETPLATFORM} = 'linux/amd64' ]; then ./configure; fi && \
-    if [ ${TARGETPLATFORM} = 'linux/arm64' ]; then ./configure DC=/ldc2-1.16.0-linux-aarch64/bin/ldmd2; fi && \
+    if [ ${TARGETPLATFORM} = 'linux/arm64' ]; then ./configure DC=/ldc2-1.17.0-linux-aarch64/bin/ldmd2; fi && \
     make clean && \
     make && \
     make install
