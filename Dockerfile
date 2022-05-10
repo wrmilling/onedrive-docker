@@ -17,9 +17,9 @@ RUN if [ ${TARGETPLATFORM} = 'linux/amd64' ]; then \
       tar -xvf ldc2-1.17.0-linux-aarch64.tar.xz; \
     fi
 
-RUN wget https://github.com/abraunegg/onedrive/archive/refs/tags/v2.4.14.tar.gz -O /tmp/onedrive.tar.gz
+RUN wget https://github.com/abraunegg/onedrive/archive/refs/tags/v2.4.17.tar.gz -O /tmp/onedrive.tar.gz
 RUN tar -zxvf /tmp/onedrive.tar.gz
-RUN mv onedrive-2.4.14 /usr/src/onedrive
+RUN mv onedrive-2.4.17 /usr/src/onedrive
 
 RUN cd /usr/src/onedrive/ && \
     if [ ${TARGETPLATFORM} = 'linux/amd64' ]; then ./configure; fi && \
